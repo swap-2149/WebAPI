@@ -1,0 +1,90 @@
+﻿
+<table id="tbl-add" class="table table-bordered">
+    <tr>
+        <td>Email: <input type="text" id="email"></td>
+        <td>Password: <input type="text" id="password"></td>
+    </tr>
+</table>
+
+<button id="btn-login">Login</button>
+
+
+
+<script>
+    const url = 'http://localhost:5120/api/user/authenticate';
+    document.addEventListener('DOMContentLoaded', () => {
+
+        document.getElementById("btn-login").addEventListener('click', async () => {
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+
+            let user = {
+                "Email": email,
+                "Password": password
+            }
+
+            //console.log(user);
+            await fetchProtectedData(user);
+        });
+
+        async function loginUser(user) {
+            try {
+                const response = await fetch('http://localhost:5120/api/user/authenticate', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(user)
+                });
+
+                if (response.ok) {
+                    var data = await response.json();
+                    console.log(data);
+                    localStorage.setItem("jwt", data.token);
+                    alert("logged in!");
+
+                    homePage();
+                }
+                else {
+                    alert('Error creating user');
+                }
+            }
+            catch (error) {
+                console.log(error);
+            }
+        }
+
+        async function fetchProtectedData(user) { 
+            try{
+                const token = localStorage.getItem("jwt");
+                //console.log(token)
+                if(token != null){
+                    const response = await fetch('http://localhost:5120/api/user/', {
+                        method: 'GET',
+                        headers: {
+                            'Authorization': `Bearer ${token}`,
+                            'Content-Type': 'application/json'
+                        },
+                    });
+
+                    if (response.ok) {
+                        var data = await response.json();
+                        //console.log(data);
+                        //homePage();
+                        window.location.href = '/Home/HomePage';
+                    }
+                    else {
+                        console.log("unauthorized user!");
+                    }
+                }else{
+                    loginUser(user);
+                }
+                
+            }catch(error){
+                console.log(error);
+            }
+        }
+
+
+    });
+</script>

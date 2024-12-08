@@ -1,0 +1,50 @@
+﻿<p id="userData"></p>
+
+<button id="btn-logout">Logout</button>
+
+<script>
+    const url = 'http://localhost:5120/api/user/';
+    document.addEventListener('DOMContentLoaded', () => {
+        homePage();
+        async function homePage() {
+            try {
+                const token = localStorage.getItem("jwt");
+                if (token != null) {
+                    const response = await fetch(url, {
+                        method: 'GET',
+                        headers: {
+                            'Authorization': `Bearer ${token}`,
+                            'Content-Type': 'application/json'
+                        },
+                    });
+
+                    if (response.ok) {
+                        var data = await response.json();
+                        //console.log(data);
+
+                        let innerhtml = "";
+                        data.forEach(user => {
+                            innerhtml += `<h3>${user.name}</h3>`
+                        })
+
+                        $("#userData").html(innerhtml);
+                    }
+                    else {
+                        console.log("unauthorized user!");
+                    }
+                } else {
+                    alert("login first!");
+                    loginUser(user);
+                }
+
+            } catch (error) {
+                console.log(error);
+            }
+        }
+
+        document.getElementById("btn-logout").addEventListener('click', async () => {
+            localStorage.removeItem("jwt");
+            window.location.href = '/Home/Login';
+        });
+    });
+</script>
